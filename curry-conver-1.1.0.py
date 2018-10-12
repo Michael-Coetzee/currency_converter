@@ -1,9 +1,12 @@
 #!/usr/bin/python
+import os.path
 import sys
 import json
 import urllib
 import argparse
 import socket
+
+save_path = 'dictionaries'
 
 currencies = {
         "USD": "US dollar",
@@ -51,10 +54,10 @@ def main(args, currencies):
             TO = sys.argv[3]
             try:
                 response = urllib.urlopen('https://api.exchangeratesapi.io/latest?base=%s' % (BASE))
-                print 'you are online... geting online results'                 
+                print 'you are online... geting online results'
                 html = response.read().decode("utf-8")
                 my_dict = json.loads(html)
-                result = my_dict['rates'][TO] 
+                result = my_dict['rates'][TO]
                 result = round(result, 2)
                 calc = int(AMT) * result
                 print 'from:','1 ' + BASE
@@ -62,7 +65,8 @@ def main(args, currencies):
                 print 'rate:', calc
                 print 'downloading and storing latest results'
                 for i in shrt_cur:
-                    with open(i + ".dict", "w") as outf:
+                    complete = os.path.join(save_path, i + ".dict")
+                    with open(complete, "w") as outf:
                         url = urllib.urlopen('https://api.exchangeratesapi.io/latest?base=%s' % i)
                         html = url.read().decode("utf-8")
                         cdict = json.loads(html)
@@ -70,7 +74,8 @@ def main(args, currencies):
             except IOError:
                 print 'you are offline...getting latest offline results'
                 if BASE in shrt_cur:
-                    with open(BASE + '.dict', 'r') as f:
+                    complete = os.path.join(save_path, BASE + ".dict")
+                    with open(complete, 'r') as f:
                         results = f.readlines()
                         for result in results:
                             user_dict = json.loads(result)
